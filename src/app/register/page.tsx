@@ -2,21 +2,50 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ENS_CONFIG } from '@/lib/config';
+import { WalletManager } from '@/lib/wallet';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // Start with wallet connection
   const [formData, setFormData] = useState({
     athleteName: '',
     country: '',
     selectedSubdomain: '',
   });
   const [isRegistering, setIsRegistering] = useState(false);
+  const [walletState, setWalletState] = useState({ isConnected: false, address: null });
   const [countries] = useState([
     'United States', 'Canada', 'United Kingdom', 'Germany', 'France',
     'Japan', 'Australia', 'Brazil', 'India', 'China', 'Other'
   ]);
+  const walletManager = WalletManager.getInstance();
+
+  // Check wallet connection on mount
+  useEffect(() => {
+    const checkWallet = async () => {
+      const currentState = walletManager.getWalletState();
+      if (currentState.isConnected) {
+        setWalletState(currentState);
+        setStep(1); // Skip to name selection if wallet already connected
+      }
+    };
+    checkWallet();
+  }, [walletManager]);
+
+  const handleWalletConnect = async () => {
+    setIsRegistering(true);
+    try {
+      const result = await walletManager.connectWallet();
+      if (result.success) {
+        setWalletState({ isConnected: true, address: result.address! });
+        setStep(1); // Move to name selection
+      }
+    } catch (error) {
+      console.error('Wallet connection failed:', error);
+    } finally {
+      setIsRegistering(false);
+    }
+  };
 
   const handleAthleteNameChange = (name: string) => {
     const subdomain = name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -38,7 +67,7 @@ export default function RegisterPage() {
       // Store athlete data locally for demo
       const athleteData = {
         ...formData,
-        walletAddress: ENS_CONFIG.WALLET_ADDRESS,
+        walletAddress: walletState.address,
         ensName: formData.selectedSubdomain,
         isVerified: true,
         registeredAt: new Date().toISOString(),
@@ -70,19 +99,25 @@ export default function RegisterPage() {
       <div className="flex justify-center mb-8">
         <div className="flex items-center space-x-4">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-            step >= 1 ? 'bg-green-500 text-white' : 'bg-gray-600 text-gray-300'
+            step >= 1 ? 'bg-green-500 text-white' : step === 0 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'
+          }`}>
+            🔗
+          </div>
+          <div className={`w-16 h-1 ${step >= 1 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+            step >= 2 ? 'bg-green-500 text-white' : step === 1 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'
           }`}>
             1
           </div>
           <div className={`w-16 h-1 ${step >= 2 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-            step >= 2 ? 'bg-green-500 text-white' : 'bg-gray-600 text-gray-300'
+            step >= 3 ? 'bg-green-500 text-white' : step === 2 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'
           }`}>
             2
           </div>
           <div className={`w-16 h-1 ${step >= 3 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-            step >= 3 ? 'bg-green-500 text-white' : 'bg-gray-600 text-gray-300'
+            step >= 4 ? 'bg-green-500 text-white' : step === 3 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'
           }`}>
             3
           </div>
@@ -90,6 +125,41 @@ export default function RegisterPage() {
       </div>
 
       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+        {step === 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-white mb-4">Connect Your Wallet</h2>
+            <div className="space-y-4 text-center">
+              <div className="text-6xl mb-4">👛</div>
+              <p className="text-gray-300 mb-6">
+                Connect your wallet to create your athlete identity. This will be linked to your World ID verification.
+              </p>
+              {!walletState.isConnected ? (
+                <button
+                  onClick={handleWalletConnect}
+                  disabled={isRegistering}
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-500 disabled:to-gray-600 text-white py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+                >
+                  {isRegistering ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                      <span>Connecting...</span>
+                    </div>
+                  ) : (
+                    '🔗 Connect Wallet'
+                  )}
+                </button>
+              ) : (
+                <div className="bg-green-500/20 border border-green-500 rounded-lg p-4">
+                  <p className="text-green-200 mb-2">✅ Wallet Connected</p>
+                  <p className="text-green-100 font-mono text-sm">
+                    {walletManager.formatAddress(walletState.address!)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {step === 1 && (
           <div>
             <h2 className="text-xl font-bold text-white mb-4">Step 1: Choose Your Athlete Name</h2>
@@ -182,7 +252,7 @@ export default function RegisterPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-300">Wallet:</span>
                   <span className="text-white font-medium text-sm">
-                    {ENS_CONFIG.WALLET_ADDRESS.slice(0, 6)}...{ENS_CONFIG.WALLET_ADDRESS.slice(-4)}
+                    {walletState.address ? walletManager.formatAddress(walletState.address) : 'Not connected'}
                   </span>
                 </div>
               </div>

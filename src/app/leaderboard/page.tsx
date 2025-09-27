@@ -17,7 +17,7 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [currentAthlete, setCurrentAthlete] = useState<any>(null);
   const [wldPrice, setWldPrice] = useState(2.50);
-  const [totalPrizePool, setTotalPrizePool] = useState('1,234.56');
+  const [totalPrizePool, setTotalPrizePool] = useState('0.0000');
   const pythManager = PythPriceManager.getInstance();
 
   useEffect(() => {
@@ -34,61 +34,15 @@ export default function LeaderboardPage() {
     };
     updatePrice();
 
-    // Generate mock leaderboard data (in real app, this would come from The Graph)
-    const mockLeaderboard: LeaderboardEntry[] = [
-      {
-        rank: 1,
-        ensName: 'speedracer.athlete.eth',
-        country: 'United States',
-        bestScore: 5,
-        gamesPlayed: 12,
-        totalWinnings: '45.2340',
-        accuracy: 95.8,
-      },
-      {
-        rank: 2,
-        ensName: 'quickdraw.athlete.eth',
-        country: 'Canada',
-        bestScore: 5,
-        gamesPlayed: 8,
-        totalWinnings: '38.9876',
-        accuracy: 92.5,
-      },
-      {
-        rank: 3,
-        ensName: 'lightning.athlete.eth',
-        country: 'United Kingdom',
-        bestScore: 4,
-        gamesPlayed: 15,
-        totalWinnings: '35.1234',
-        accuracy: 88.3,
-      },
-      {
-        rank: 4,
-        ensName: 'fastfingers.athlete.eth',
-        country: 'Germany',
-        bestScore: 4,
-        gamesPlayed: 9,
-        totalWinnings: '29.8765',
-        accuracy: 85.7,
-      },
-      {
-        rank: 5,
-        ensName: 'reflexking.athlete.eth',
-        country: 'Japan',
-        bestScore: 4,
-        gamesPlayed: 6,
-        totalWinnings: '27.4567',
-        accuracy: 84.2,
-      },
-    ];
+    // Start with empty leaderboard - real testnet data only
+    const realLeaderboard: LeaderboardEntry[] = [];
 
-    // Add current athlete to leaderboard if they exist
+    // Add current athlete to leaderboard if they exist and have played games
     if (stored) {
       const athlete = JSON.parse(stored);
       if (athlete.gamesPlayed > 0) {
         const athleteEntry: LeaderboardEntry = {
-          rank: mockLeaderboard.length + 1,
+          rank: 1, // Only real athlete for now
           ensName: athlete.ensName,
           country: athlete.country,
           bestScore: athlete.bestScore || 0,
@@ -96,11 +50,15 @@ export default function LeaderboardPage() {
           totalWinnings: athlete.totalWinnings || '0.0000',
           accuracy: athlete.bestScore ? (athlete.bestScore / 5) * 100 : 0,
         };
-        mockLeaderboard.push(athleteEntry);
+        realLeaderboard.push(athleteEntry);
       }
     }
 
-    setLeaderboard(mockLeaderboard);
+    setLeaderboard(realLeaderboard);
+
+    // Calculate total prize pool from real winnings
+    const totalWinnings = realLeaderboard.reduce((sum, athlete) => sum + parseFloat(athlete.totalWinnings), 0);
+    setTotalPrizePool(totalWinnings.toFixed(4));
   }, [pythManager]);
 
   const getCountryFlag = (country: string) => {
