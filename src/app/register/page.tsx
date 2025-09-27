@@ -152,46 +152,76 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-4">
-          Athlete Registration
-        </h1>
-        <p className="text-gray-300 text-lg">
-          Create your athlete identity with ENS
-        </p>
-      </div>
-
-      {/* Progress Steps */}
-      <div className="flex justify-center mb-8">
-        <div className="flex items-center space-x-4">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-            step >= 1 ? 'bg-green-500 text-white' : step === 0 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'
-          }`}>
-            🔗
+    <div className="max-w-3xl mx-auto">
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-4 mb-6">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center text-3xl">
+            👛
           </div>
-          <div className={`w-16 h-1 ${step >= 1 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-            step >= 2 ? 'bg-green-500 text-white' : step === 1 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'
-          }`}>
-            1
-          </div>
-          <div className={`w-16 h-1 ${step >= 2 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-            step >= 3 ? 'bg-green-500 text-white' : step === 2 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'
-          }`}>
-            2
-          </div>
-          <div className={`w-16 h-1 ${step >= 3 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-            step >= 4 ? 'bg-green-500 text-white' : step === 3 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'
-          }`}>
-            3
+          <div className="text-left">
+            <h1 className="text-4xl md:text-5xl font-light text-white tracking-tight">
+              Athlete Registration
+            </h1>
+            <p className="text-slate-300 text-lg">
+              Create your verified athlete identity
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+      {/* Progress Steps */}
+      <div className="flex justify-center mb-12">
+        <div className="flex items-center space-x-6">
+          <div className={`flex items-center gap-3 ${
+            step >= 1 ? 'text-green-400' : step === 0 ? 'text-blue-400' : 'text-slate-500'
+          }`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl ${
+              step >= 1 ? 'bg-green-500/20' : step === 0 ? 'bg-blue-500/20' : 'bg-slate-700/50'
+            }`}>
+              🔗
+            </div>
+            <span className="text-sm font-medium hidden sm:block">Connect</span>
+          </div>
+          <div className={`w-20 h-1 rounded-full ${step >= 1 ? 'bg-green-500' : 'bg-slate-700'}`}></div>
+
+          <div className={`flex items-center gap-3 ${
+            step >= 2 ? 'text-green-400' : step === 1 ? 'text-blue-400' : 'text-slate-500'
+          }`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl ${
+              step >= 2 ? 'bg-green-500/20' : step === 1 ? 'bg-blue-500/20' : 'bg-slate-700/50'
+            }`}>
+              🏷️
+            </div>
+            <span className="text-sm font-medium hidden sm:block">Identity</span>
+          </div>
+          <div className={`w-20 h-1 rounded-full ${step >= 2 ? 'bg-green-500' : 'bg-slate-700'}`}></div>
+
+          <div className={`flex items-center gap-3 ${
+            step >= 3 ? 'text-green-400' : step === 2 ? 'text-blue-400' : 'text-slate-500'
+          }`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl ${
+              step >= 3 ? 'bg-green-500/20' : step === 2 ? 'bg-blue-500/20' : 'bg-slate-700/50'
+            }`}>
+              🌍
+            </div>
+            <span className="text-sm font-medium hidden sm:block">Country</span>
+          </div>
+          <div className={`w-20 h-1 rounded-full ${step >= 3 ? 'bg-green-500' : 'bg-slate-700'}`}></div>
+
+          <div className={`flex items-center gap-3 ${
+            step >= 4 ? 'text-green-400' : step === 3 ? 'text-blue-400' : 'text-slate-500'
+          }`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl ${
+              step >= 4 ? 'bg-green-500/20' : step === 3 ? 'bg-blue-500/20' : 'bg-slate-700/50'
+            }`}>
+              ✅
+            </div>
+            <span className="text-sm font-medium hidden sm:block">Complete</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-slate-900/30 backdrop-blur-sm rounded-3xl p-8 border border-slate-700/30">
         {step === 0 && (
           <div>
             <h2 className="text-xl font-bold text-white mb-4">Connect Your Wallet</h2>
