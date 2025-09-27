@@ -3,6 +3,7 @@ context.md
 llms.txt
 partnerbountydeets.txt
 attached_assets/
+TESTNET_DEPLOYMENT.md
 
 # Dependencies
 node_modules/

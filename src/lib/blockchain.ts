@@ -7,7 +7,7 @@ export const WORLD_CHAIN_SEPOLIA = {
   rpcUrl: 'https://worldchain-sepolia.g.alchemy.com/public',
   blockExplorer: 'https://worldchain-sepolia.blockscout.com',
   contracts: {
-    chainOlympics: '0x2222222222222222222222222222222222222222', // Mock address
+    chainOlympics: '0x630db23f93918176af66ffa83614a120d61004e8', // ✅ DEPLOYED ON WORLD CHAIN SEPOLIA
     worldIdRouter: '0x11cA3127182f7583EfC416a8771BD4d11Fae4334',
     wldToken: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',
   },

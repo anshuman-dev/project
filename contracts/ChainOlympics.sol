@@ -68,9 +68,9 @@ contract ChainOlympics is Ownable, ReentrancyGuard {
         address _worldId,
         string memory _appId,
         address _wldToken
-    ) {
+    ) Ownable(msg.sender) {
         worldId = IWorldID(_worldId);
-        externalNullifier = abi.encodePacked(_appId).hashToField();
+        externalNullifier = ByteHasher.hashToField(abi.encodePacked(_appId));
         wldToken = IERC20(_wldToken);
     }
 
@@ -89,7 +89,7 @@ contract ChainOlympics is Ownable, ReentrancyGuard {
         worldId.verifyProof(
             root,
             groupId,
-            abi.encodePacked(athlete).hashToField(),
+            ByteHasher.hashToField(abi.encodePacked(athlete)),
             nullifierHash,
             externalNullifier,
             proof
@@ -247,11 +247,5 @@ library ByteHasher {
     /// @dev `>> 8` makes sure that the result is included in our field
     function hashToField(bytes memory value) internal pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(value))) >> 8;
-    }
-}
-
-extension ByteHasher for bytes {
-    function hashToField() internal pure returns (uint256) {
-        return ByteHasher.hashToField(this);
     }
 }
