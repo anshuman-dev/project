@@ -77,6 +77,40 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Testing Navigation */}
+        <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+          <h3 className="text-lg font-bold text-white mb-4">🧪 Test the Platform</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Link
+              href="/register"
+              className="bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500 text-blue-200 px-4 py-3 rounded-lg text-sm font-medium transition-all text-center"
+            >
+              👛 Register Athlete
+            </Link>
+            <Link
+              href="/game"
+              className="bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-orange-200 px-4 py-3 rounded-lg text-sm font-medium transition-all text-center"
+            >
+              🌋 Play Game
+            </Link>
+            <Link
+              href="/leaderboard"
+              className="bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500 text-yellow-200 px-4 py-3 rounded-lg text-sm font-medium transition-all text-center"
+            >
+              🏆 Leaderboard
+            </Link>
+            <Link
+              href="/verify"
+              className="bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500 text-purple-200 px-4 py-3 rounded-lg text-sm font-medium transition-all text-center"
+            >
+              🌍 World ID
+            </Link>
+          </div>
+          <p className="text-gray-400 text-sm mt-3 text-center">
+            Quick access to all platform features for testing
+          </p>
+        </div>
       </div>
 
       {/* Game Preview */}

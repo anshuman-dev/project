@@ -7,10 +7,10 @@ import LavaPlatformGame from '@/components/LavaPlatformGame';
 
 export default function GamePage() {
   const router = useRouter();
-  const [athleteData, setAthleteData] = useState<any>(null);
+  const [athleteData, setAthleteData] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [wldPrice, setWldPrice] = useState(2.50);
   const [currentPrize, setCurrentPrize] = useState('');
-  const [gameResult, setGameResult] = useState<any>(null);
+  const [gameResult, setGameResult] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [showGame, setShowGame] = useState(false);
   const pythManager = PythPriceManager.getInstance();
 
@@ -237,7 +237,7 @@ export default function GamePage() {
             <p className="mb-2"><strong>📱 Mobile:</strong> Touch to move, tap to jump</p>
           </div>
           <div>
-            <p className="mb-2"><strong>🔥 Lava:</strong> Rises faster each level - don't get caught!</p>
+            <p className="mb-2"><strong>🔥 Lava:</strong> Rises faster each level - don&apos;t get caught!</p>
             <p className="mb-2"><strong>💰 Scoring:</strong> Height climbed + platform bonuses</p>
             <p className="mb-2"><strong>🏆 Prizes:</strong> Dynamic WLD rewards via Pyth price feeds</p>
           </div>
