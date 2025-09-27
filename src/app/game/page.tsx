@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PythPriceManager } from '@/lib/pyth';
+import { blockchainManager } from '@/lib/blockchain';
 import LavaPlatformGame from '@/components/LavaPlatformGame';
 
 export default function GamePage() {
@@ -12,6 +13,8 @@ export default function GamePage() {
   const [currentPrize, setCurrentPrize] = useState('');
   const [gameResult, setGameResult] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [showGame, setShowGame] = useState(false);
+  const [isSubmittingResult, setIsSubmittingResult] = useState(false);
+  const [blockchainTx, setBlockchainTx] = useState<string | null>(null);
   const pythManager = PythPriceManager.getInstance();
 
   // Load athlete data on mount
@@ -43,43 +46,94 @@ export default function GamePage() {
   }, [pythManager]);
 
   const handleGameEnd = async (score: number, level: number) => {
-    // Calculate prize based on score and level
-    const maxScore = 50; // Reasonable max for platform jumping
-    const adjustedScore = Math.min(score, maxScore); // Cap the score
-    const prizeCalc = pythManager.calculatePrizeAmount(adjustedScore, maxScore);
+    setIsSubmittingResult(true);
+    setBlockchainTx(null);
 
-    // Add level bonus
-    const levelBonus = (level - 1) * 0.1; // 10% bonus per level above 1
-    const finalPrize = {
-      ...prizeCalc,
-      wldAmount: prizeCalc.wldAmount * (1 + levelBonus),
-      usdAmount: prizeCalc.usdAmount * (1 + levelBonus),
-    };
+    try {
+      // Submit game result to blockchain
+      const blockchainResult = await blockchainManager.submitGameResult(
+        score,
+        level,
+        'lava-platform-jumper'
+      );
 
-    const result = {
-      score,
-      level,
-      maxScore,
-      prize: finalPrize,
-      timestamp: new Date().toISOString(),
-    };
+      if (blockchainResult.success && blockchainResult.txHash) {
+        setBlockchainTx(blockchainResult.txHash);
 
-    setGameResult(result);
+        // Calculate prize based on blockchain response
+        const maxScore = 50;
+        const adjustedScore = Math.min(score, maxScore);
+        const prizeCalc = pythManager.calculatePrizeAmount(adjustedScore, maxScore);
 
-    // Update athlete stats in localStorage
-    if (athleteData) {
-      const updatedAthlete = {
-        ...athleteData,
-        gamesPlayed: (athleteData.gamesPlayed || 0) + 1,
-        bestScore: Math.max(athleteData.bestScore || 0, score),
-        totalWinnings: (parseFloat(athleteData.totalWinnings || '0') + finalPrize.wldAmount).toFixed(4),
-        lastLevel: level,
+        // Use blockchain prize amount if available
+        const blockchainPrize = blockchainResult.prizeAmount
+          ? parseFloat(blockchainResult.prizeAmount)
+          : prizeCalc.wldAmount;
+
+        const levelBonus = (level - 1) * 0.1;
+        const finalPrize = {
+          ...prizeCalc,
+          wldAmount: blockchainPrize * (1 + levelBonus),
+          usdAmount: blockchainPrize * (1 + levelBonus) * wldPrice,
+        };
+
+        const result = {
+          score,
+          level,
+          maxScore,
+          prize: finalPrize,
+          timestamp: new Date().toISOString(),
+          txHash: blockchainResult.txHash,
+          blockchainVerified: true,
+        };
+
+        setGameResult(result);
+
+        // Update athlete stats in localStorage
+        if (athleteData) {
+          const updatedAthlete = {
+            ...athleteData,
+            gamesPlayed: (athleteData.gamesPlayed || 0) + 1,
+            bestScore: Math.max(athleteData.bestScore || 0, score),
+            totalWinnings: (parseFloat(athleteData.totalWinnings || '0') + finalPrize.wldAmount).toFixed(4),
+            lastLevel: level,
+            lastTxHash: blockchainResult.txHash,
+          };
+          localStorage.setItem('chainolympics_athlete', JSON.stringify(updatedAthlete));
+          setAthleteData(updatedAthlete);
+        }
+      } else {
+        throw new Error(blockchainResult.error || 'Blockchain submission failed');
+      }
+    } catch (error) {
+      console.error('Game result submission failed:', error);
+
+      // Fallback to local processing
+      const maxScore = 50;
+      const adjustedScore = Math.min(score, maxScore);
+      const prizeCalc = pythManager.calculatePrizeAmount(adjustedScore, maxScore);
+      const levelBonus = (level - 1) * 0.1;
+      const finalPrize = {
+        ...prizeCalc,
+        wldAmount: prizeCalc.wldAmount * (1 + levelBonus),
+        usdAmount: prizeCalc.usdAmount * (1 + levelBonus),
       };
-      localStorage.setItem('chainolympics_athlete', JSON.stringify(updatedAthlete));
-      setAthleteData(updatedAthlete);
-    }
 
-    setShowGame(false);
+      const result = {
+        score,
+        level,
+        maxScore,
+        prize: finalPrize,
+        timestamp: new Date().toISOString(),
+        blockchainVerified: false,
+        error: 'Blockchain submission failed - result stored locally',
+      };
+
+      setGameResult(result);
+    } finally {
+      setIsSubmittingResult(false);
+      setShowGame(false);
+    }
   };
 
   const startNewGame = () => {
@@ -164,6 +218,14 @@ export default function GamePage() {
         ) : showGame ? (
           <div className="text-center">
             <LavaPlatformGame onGameEnd={handleGameEnd} />
+            {isSubmittingResult && (
+              <div className="mt-4 bg-blue-500/20 border border-blue-500 rounded-lg p-4">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full"></div>
+                  <span className="text-blue-200">Submitting to blockchain...</span>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           gameResult && (
@@ -205,6 +267,16 @@ export default function GamePage() {
                       🔥 Level {gameResult.level} Bonus: +{((gameResult.level - 1) * 10)}%
                     </div>
                   )}
+                  {gameResult.blockchainVerified && gameResult.txHash && (
+                    <div className="text-sm text-green-300">
+                      ✅ Verified on blockchain
+                    </div>
+                  )}
+                  {gameResult.error && (
+                    <div className="text-sm text-red-300">
+                      ⚠️ {gameResult.error}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -221,6 +293,14 @@ export default function GamePage() {
                 >
                   🏆 View Leaderboard
                 </button>
+                {gameResult.txHash && (
+                  <button
+                    onClick={() => window.open(blockchainManager.getBlockExplorerUrl(gameResult.txHash), '_blank')}
+                    className="bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500 text-blue-200 px-6 py-3 rounded-lg font-bold transition-all"
+                  >
+                    🔗 View Transaction
+                  </button>
+                )}
               </div>
             </div>
           )

@@ -1,0 +1,298 @@
+import { ethers } from 'ethers';
+
+// World Chain Sepolia configuration
+export const WORLD_CHAIN_SEPOLIA = {
+  chainId: 4801,
+  name: 'World Chain Sepolia',
+  rpcUrl: 'https://worldchain-sepolia.g.alchemy.com/public',
+  blockExplorer: 'https://worldchain-sepolia.blockscout.com',
+  contracts: {
+    chainOlympics: '0x2222222222222222222222222222222222222222', // Mock address
+    worldIdRouter: '0x11cA3127182f7583EfC416a8771BD4d11Fae4334',
+    wldToken: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',
+  },
+};
+
+// Contract ABI (simplified for key functions)
+const CHAIN_OLYMPICS_ABI = [
+  'function verifyAndRegisterAthlete(address athlete, string ensName, string country, uint256 root, uint256 nullifierHash, uint256[8] proof)',
+  'function submitGameResult(uint256 score, uint256 level, string gameType)',
+  'function getAthlete(address athleteAddr) view returns (tuple(address wallet, string ensName, string country, uint256 totalGames, uint256 bestScore, uint256 totalWinnings, bool isVerified, uint256 registeredAt))',
+  'function getLeaderboard() view returns (address[], string[], string[], uint256[], uint256[], uint256[])',
+  'function athletes(address) view returns (address, string, string, uint256, uint256, uint256, bool, uint256)',
+  'event AthleteRegistered(address indexed athlete, string ensName, string country)',
+  'event GameCompleted(address indexed athlete, uint256 score, uint256 level, uint256 prize)',
+  'event WorldIDVerified(address indexed athlete, uint256 nullifierHash)',
+];
+
+export interface ChainAthlete {
+  wallet: string;
+  ensName: string;
+  country: string;
+  totalGames: number;
+  bestScore: number;
+  totalWinnings: string;
+  isVerified: boolean;
+  registeredAt: number;
+}
+
+export interface GameTransaction {
+  hash: string;
+  score: number;
+  level: number;
+  prizeAmount: string;
+  timestamp: number;
+  blockNumber: number;
+}
+
+export class BlockchainManager {
+  private static instance: BlockchainManager;
+  private provider: ethers.providers.JsonRpcProvider;
+  private contract: ethers.Contract | null = null;
+  private signer: ethers.Signer | null = null;
+
+  private constructor() {
+    this.provider = new ethers.providers.JsonRpcProvider(WORLD_CHAIN_SEPOLIA.rpcUrl);
+  }
+
+  public static getInstance(): BlockchainManager {
+    if (!BlockchainManager.instance) {
+      BlockchainManager.instance = new BlockchainManager();
+    }
+    return BlockchainManager.instance;
+  }
+
+  async connectWallet(): Promise<{ success: boolean; address?: string; error?: string }> {
+    try {
+      if (typeof window === 'undefined' || !window.ethereum) {
+        return { success: false, error: 'MetaMask not installed' };
+      }
+
+      // Request account access
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      // Setup Web3Provider with MetaMask
+      const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+      this.signer = web3Provider.getSigner();
+      const address = await this.signer.getAddress();
+
+      // Initialize contract with signer
+      this.contract = new ethers.Contract(
+        WORLD_CHAIN_SEPOLIA.contracts.chainOlympics,
+        CHAIN_OLYMPICS_ABI,
+        this.signer
+      );
+
+      // Check if we're on the correct network
+      const network = await web3Provider.getNetwork();
+      if (network.chainId !== WORLD_CHAIN_SEPOLIA.chainId) {
+        await this.switchToWorldChain();
+      }
+
+      return { success: true, address };
+    } catch (error) {
+      console.error('Wallet connection error:', error);
+      return { success: false, error: 'Failed to connect wallet' };
+    }
+  }
+
+  private async switchToWorldChain(): Promise<void> {
+    if (!window.ethereum) return;
+
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${WORLD_CHAIN_SEPOLIA.chainId.toString(16)}` }],
+      });
+    } catch (switchError: any) {
+      // If the chain doesn't exist, add it
+      if (switchError.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainId: `0x${WORLD_CHAIN_SEPOLIA.chainId.toString(16)}`,
+              chainName: WORLD_CHAIN_SEPOLIA.name,
+              rpcUrls: [WORLD_CHAIN_SEPOLIA.rpcUrl],
+              blockExplorerUrls: [WORLD_CHAIN_SEPOLIA.blockExplorer],
+              nativeCurrency: {
+                name: 'ETH',
+                symbol: 'ETH',
+                decimals: 18,
+              },
+            },
+          ],
+        });
+      }
+    }
+  }
+
+  async registerAthlete(
+    athleteData: {
+      ensName: string;
+      country: string;
+      address: string;
+    },
+    worldIdProof: {
+      root: string;
+      nullifierHash: string;
+      proof: string[];
+    }
+  ): Promise<{ success: boolean; txHash?: string; error?: string }> {
+    try {
+      if (!this.contract || !this.signer) {
+        return { success: false, error: 'Wallet not connected' };
+      }
+
+      // For demo purposes, simulate the transaction
+      // In production, this would call the actual contract
+      const mockTxHash = '0x' + Math.random().toString(16).substring(2);
+
+      console.log('Simulating athlete registration:', {
+        athlete: athleteData.address,
+        ensName: athleteData.ensName,
+        country: athleteData.country,
+        worldIdProof,
+      });
+
+      // Simulate transaction delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      return { success: true, txHash: mockTxHash };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'Registration failed' };
+    }
+  }
+
+  async submitGameResult(
+    score: number,
+    level: number,
+    gameType: string = 'lava-platform-jumper'
+  ): Promise<{ success: boolean; txHash?: string; prizeAmount?: string; error?: string }> {
+    try {
+      if (!this.contract || !this.signer) {
+        return { success: false, error: 'Wallet not connected' };
+      }
+
+      // Calculate expected prize (same logic as smart contract)
+      const basePrize = (score * 0.1) / 50; // Up to 0.1 WLD for perfect score
+      const levelBonus = (level - 1) * (basePrize / 10);
+      const totalPrize = Math.min(basePrize + levelBonus, 5); // Cap at 5 WLD
+
+      // For demo purposes, simulate the transaction
+      const mockTxHash = '0x' + Math.random().toString(16).substring(2);
+
+      console.log('Simulating game result submission:', {
+        score,
+        level,
+        gameType,
+        expectedPrize: totalPrize,
+      });
+
+      // Simulate transaction delay
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      return {
+        success: true,
+        txHash: mockTxHash,
+        prizeAmount: totalPrize.toFixed(4),
+      };
+    } catch (error) {
+      console.error('Game submission error:', error);
+      return { success: false, error: 'Game submission failed' };
+    }
+  }
+
+  async getAthleteData(address: string): Promise<ChainAthlete | null> {
+    try {
+      // For demo purposes, return mock data based on localStorage
+      const stored = localStorage.getItem('chainolympics_athlete');
+      if (!stored) return null;
+
+      const localData = JSON.parse(stored);
+
+      // Simulate blockchain data structure
+      return {
+        wallet: address,
+        ensName: localData.ensName || '',
+        country: localData.country || '',
+        totalGames: localData.gamesPlayed || 0,
+        bestScore: localData.bestScore || 0,
+        totalWinnings: localData.totalWinnings || '0.0000',
+        isVerified: localData.isVerified || false,
+        registeredAt: Date.now(),
+      };
+    } catch (error) {
+      console.error('Error fetching athlete data:', error);
+      return null;
+    }
+  }
+
+  async getLeaderboard(): Promise<ChainAthlete[]> {
+    try {
+      // For demo purposes, return data from localStorage
+      // In production, this would query the smart contract
+      const stored = localStorage.getItem('chainolympics_athlete');
+      if (!stored) return [];
+
+      const localData = JSON.parse(stored);
+      if (localData.gamesPlayed > 0) {
+        return [{
+          wallet: localData.walletAddress || '0x0000000000000000000000000000000000000000',
+          ensName: localData.ensName || '',
+          country: localData.country || '',
+          totalGames: localData.gamesPlayed || 0,
+          bestScore: localData.bestScore || 0,
+          totalWinnings: localData.totalWinnings || '0.0000',
+          isVerified: localData.isVerified || false,
+          registeredAt: Date.now(),
+        }];
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      return [];
+    }
+  }
+
+  async getTransactionDetails(txHash: string): Promise<GameTransaction | null> {
+    try {
+      // For demo purposes, return mock transaction data
+      return {
+        hash: txHash,
+        score: 45,
+        level: 3,
+        prizeAmount: '0.1250',
+        timestamp: Date.now(),
+        blockNumber: Math.floor(Math.random() * 1000000) + 5000000,
+      };
+    } catch (error) {
+      console.error('Error fetching transaction:', error);
+      return null;
+    }
+  }
+
+  getBlockExplorerUrl(txHash: string): string {
+    return `${WORLD_CHAIN_SEPOLIA.blockExplorer}/tx/${txHash}`;
+  }
+
+  formatAddress(address: string): string {
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  }
+}
+
+// Global instance
+export const blockchainManager = BlockchainManager.getInstance();
+
+// Type declarations for window.ethereum
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>;
+      on: (event: string, callback: (...args: any[]) => void) => void;
+      removeListener: (event: string, callback: (...args: any[]) => void) => void;
+    };
+  }
+}

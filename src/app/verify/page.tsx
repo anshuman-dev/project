@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMiniKit } from '@/components/MiniKitProvider';
+import { blockchainManager } from '@/lib/blockchain';
 
 export default function VerifyPage() {
   const router = useRouter();
@@ -11,7 +12,8 @@ export default function VerifyPage() {
   const [verificationResult, setVerificationResult] = useState<{
     success: boolean;
     message: string;
-    proof?: any;
+    proof?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    txHash?: string;
   } | null>(null);
 
   const handleVerification = async () => {
@@ -30,16 +32,19 @@ export default function VerifyPage() {
       const result = await miniKit.verifyWorldID();
 
       if (result.success) {
+        // Store World ID proof for later use in registration
+        localStorage.setItem('chainolympics_worldid_proof', JSON.stringify(result.proof));
+
         setVerificationResult({
           success: true,
           message: 'Successfully verified as human! You can now register as an athlete.',
           proof: result.proof,
         });
 
-        // Auto-redirect to registration after 2 seconds
+        // Auto-redirect to registration after 3 seconds
         setTimeout(() => {
           router.push('/register');
-        }, 2000);
+        }, 3000);
       } else {
         setVerificationResult({
           success: false,

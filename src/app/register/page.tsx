@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { WalletManager } from '@/lib/wallet';
+import { blockchainManager } from '@/lib/blockchain';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,13 +15,15 @@ export default function RegisterPage() {
   });
   const [isRegistering, setIsRegistering] = useState(false);
   const [walletState, setWalletState] = useState({ isConnected: false, address: null });
+  const [worldIdProof, setWorldIdProof] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [registrationTxHash, setRegistrationTxHash] = useState<string | null>(null);
   const [countries] = useState([
     'United States', 'Canada', 'United Kingdom', 'Germany', 'France',
     'Japan', 'Australia', 'Brazil', 'India', 'China', 'Other'
   ]);
   const walletManager = WalletManager.getInstance();
 
-  // Check wallet connection on mount
+  // Check wallet connection and World ID proof on mount
   useEffect(() => {
     const checkWallet = async () => {
       const currentState = walletManager.getWalletState();
@@ -29,6 +32,17 @@ export default function RegisterPage() {
         setStep(1); // Skip to name selection if wallet already connected
       }
     };
+
+    // Check for World ID proof from verification
+    const storedProof = localStorage.getItem('chainolympics_worldid_proof');
+    if (storedProof) {
+      try {
+        setWorldIdProof(JSON.parse(storedProof));
+      } catch (error) {
+        console.error('Failed to parse World ID proof:', error);
+      }
+    }
+
     checkWallet();
   }, [walletManager]);
 
@@ -58,27 +72,80 @@ export default function RegisterPage() {
 
   const handleRegistration = async () => {
     setIsRegistering(true);
+    setRegistrationTxHash(null);
 
     try {
-      // Simulate ENS registration process
-      // In real implementation, this would interact with ENS contracts
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Connect to blockchain if not already connected
+      const walletResult = await blockchainManager.connectWallet();
+      if (!walletResult.success) {
+        throw new Error(walletResult.error || 'Wallet connection failed');
+      }
 
-      // Store athlete data locally for demo
+      // Prepare athlete data for blockchain registration
+      const athleteData = {
+        ensName: formData.selectedSubdomain,
+        country: formData.country,
+        address: walletState.address || walletResult.address!,
+      };
+
+      // Simulate World ID proof for demo (in production, use real proof)
+      const mockWorldIdProof = worldIdProof || {
+        root: '0x' + '1'.repeat(64),
+        nullifierHash: '0x' + Math.random().toString(16).substring(2).padStart(64, '0'),
+        proof: Array(8).fill('0x' + '1'.repeat(64)),
+      };
+
+      // Register athlete on blockchain
+      const registrationResult = await blockchainManager.registerAthlete(
+        athleteData,
+        mockWorldIdProof
+      );
+
+      if (registrationResult.success && registrationResult.txHash) {
+        setRegistrationTxHash(registrationResult.txHash);
+
+        // Store athlete data locally with blockchain info
+        const localAthleteData = {
+          ...formData,
+          walletAddress: athleteData.address,
+          ensName: formData.selectedSubdomain,
+          isVerified: true,
+          registeredAt: new Date().toISOString(),
+          registrationTxHash: registrationResult.txHash,
+          worldIdVerified: true,
+        };
+
+        localStorage.setItem('chainolympics_athlete', JSON.stringify(localAthleteData));
+
+        // Clear World ID proof from storage
+        localStorage.removeItem('chainolympics_worldid_proof');
+
+        // Wait a moment to show transaction hash, then redirect
+        setTimeout(() => {
+          router.push('/game');
+        }, 3000);
+      } else {
+        throw new Error(registrationResult.error || 'Blockchain registration failed');
+      }
+    } catch (error) {
+      console.error('Registration failed:', error);
+
+      // Fallback to local registration
       const athleteData = {
         ...formData,
         walletAddress: walletState.address,
         ensName: formData.selectedSubdomain,
         isVerified: true,
         registeredAt: new Date().toISOString(),
+        registrationTxHash: null,
+        worldIdVerified: !!worldIdProof,
       };
 
       localStorage.setItem('chainolympics_athlete', JSON.stringify(athleteData));
 
-      // Redirect to game
-      router.push('/game');
-    } catch (error) {
-      console.error('Registration failed:', error);
+      setTimeout(() => {
+        router.push('/game');
+      }, 2000);
     } finally {
       setIsRegistering(false);
     }
@@ -263,6 +330,31 @@ export default function RegisterPage() {
                   Your ENS subdomain will be linked to your verified World ID.
                 </p>
               </div>
+
+              {worldIdProof && (
+                <div className="bg-green-500/20 border border-green-500 rounded-lg p-3">
+                  <p className="text-green-200 text-sm">
+                    ✅ <strong>World ID Verified:</strong> Your human verification is ready for blockchain registration.
+                  </p>
+                </div>
+              )}
+
+              {registrationTxHash && (
+                <div className="bg-blue-500/20 border border-blue-500 rounded-lg p-3">
+                  <p className="text-blue-200 text-sm mb-2">
+                    🔗 <strong>Registration Transaction:</strong>
+                  </p>
+                  <p className="text-blue-100 font-mono text-xs break-all">
+                    {registrationTxHash}
+                  </p>
+                  <button
+                    onClick={() => window.open(blockchainManager.getBlockExplorerUrl(registrationTxHash), '_blank')}
+                    className="mt-2 text-blue-300 hover:text-blue-100 text-sm underline"
+                  >
+                    View on Block Explorer
+                  </button>
+                </div>
+              )}
 
               <div className="flex space-x-3">
                 <button
