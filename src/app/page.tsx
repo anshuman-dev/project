@@ -81,27 +81,27 @@ export default function Home() {
 
       {/* Game Preview */}
       <div className="mt-16 bg-white/5 rounded-xl p-8 border border-white/10">
-        <h2 className="text-2xl font-bold text-white mb-4">Featured Game: Reaction Speed</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">🌋 Featured Game: Lava Platform Jumper</h2>
         <p className="text-gray-300 mb-6">
-          Test your reflexes in our flagship skill-based competition.
-          Click targets as fast as possible to win prizes!
+          Escape the rising lava by jumping on platforms! A thrilling skill-based adventure
+          where the higher you climb, the more you earn. Beat the lava, beat the competition!
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <div className="text-yellow-400 font-bold">5 Targets</div>
-            <div className="text-gray-400">Per Game</div>
+            <div className="text-orange-400 font-bold">🏃‍♂️ Platformer</div>
+            <div className="text-gray-400">Stickman Adventure</div>
           </div>
           <div>
-            <div className="text-yellow-400 font-bold">5 Seconds</div>
-            <div className="text-gray-400">Time Limit</div>
+            <div className="text-red-400 font-bold">🌋 Rising Lava</div>
+            <div className="text-gray-400">Increasing Speed</div>
           </div>
           <div>
-            <div className="text-yellow-400 font-bold">Skill-Based</div>
+            <div className="text-yellow-400 font-bold">🎯 Skill-Based</div>
             <div className="text-gray-400">No Gambling</div>
           </div>
           <div>
-            <div className="text-yellow-400 font-bold">Real Prizes</div>
-            <div className="text-gray-400">In WLD</div>
+            <div className="text-green-400 font-bold">💰 Real Prizes</div>
+            <div className="text-gray-400">Level Bonuses</div>
           </div>
         </div>
       </div>

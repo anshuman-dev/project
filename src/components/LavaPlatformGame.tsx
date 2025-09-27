@@ -154,7 +154,7 @@ export default function LavaPlatformGame({ onGameEnd }: LavaPlatformGameProps) {
         case 'w':
         case 'W':
           e.preventDefault();
-          if (prev.player.isOnPlatform || prev.player.y >= GAME_CONFIG.CANVAS_HEIGHT - 100) {
+          if (gameState.player.isOnPlatform || gameState.player.y >= GAME_CONFIG.CANVAS_HEIGHT - 100) {
             setGameState(prev => ({
               ...prev,
               player: {
