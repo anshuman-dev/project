@@ -9,61 +9,61 @@ export default function Home() {
   const [currentPrize, setCurrentPrize] = useState('$125.50');
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {/* Hero Section */}
-      <div className="text-center mb-24 py-16">
+      <div className="text-center mb-20 py-12">
         <div className="mb-12">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-            Chain<span className="text-blue-400">Olympics</span>
+          <h1 className="text-5xl md:text-6xl font-playfair font-bold text-gray-900 mb-6 tracking-tight">
+            Chain<span className="text-gray-600">Olympics</span>
           </h1>
-          <div className="w-16 h-1 bg-blue-500 mx-auto mb-8"></div>
+          <div className="w-24 h-0.5 bg-gray-900 mx-auto mb-8"></div>
         </div>
 
-        <p className="text-xl md:text-2xl text-gray-300 mb-16 max-w-4xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-gray-700 mb-16 max-w-4xl mx-auto leading-relaxed font-medium">
           Skill-based competitions with verified human participation and real cryptocurrency rewards.
         </p>
 
-        <div className="inline-flex items-center gap-4 bg-gray-900 border border-gray-700 rounded-xl px-8 py-5">
-          <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-          <span className="text-gray-200 text-lg font-medium">Current Prize Pool:</span>
-          <span className="text-blue-400 font-bold text-xl">{currentPrize} WLD</span>
+        <div className="inline-flex items-center gap-4 bg-gray-50 border border-gray-300 rounded-lg px-8 py-5 shadow-sm">
+          <div className="w-3 h-3 bg-green-600 rounded-full"></div>
+          <span className="text-gray-700 text-lg font-medium">Current Prize Pool:</span>
+          <span className="text-gray-900 font-bold text-xl">{currentPrize} WLD</span>
         </div>
       </div>
 
       {/* Features Grid */}
-      <div className="grid md:grid-cols-3 gap-8 mb-24">
-        <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition-colors">
-          <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
-            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <div className="grid md:grid-cols-3 gap-8 mb-20">
+        <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center mb-6">
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-white mb-4">Human Verification</h3>
-          <p className="text-gray-400 leading-relaxed">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4 font-playfair">Human Verification</h3>
+          <p className="text-gray-600 leading-relaxed">
             Zero-knowledge proof verification through World ID ensures only verified humans participate.
           </p>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition-colors">
-          <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
-            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center mb-6">
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-white mb-4">Athletic Identity</h3>
-          <p className="text-gray-400 leading-relaxed">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4 font-playfair">Athletic Identity</h3>
+          <p className="text-gray-600 leading-relaxed">
             Secure your .athlete.eth subdomain for permanent cross-platform reputation.
           </p>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition-colors">
-          <div className="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center mb-6">
-            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center mb-6">
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.08 2.94-.01 4.04.08 1.15.16 2.08.05 2.79-.12.75-.39 1.29-.73 1.61-.34.32-.77.51-1.28.59-.5.08-1.07.05-1.69-.08-.62-.13-1.29-.35-2.01-.65-.72-.3-1.49-.68-2.3-1.13-.81-.45-1.66-.98-2.55-1.59l1.4-1.4c.73.49 1.4.87 2.01 1.15.61.28 1.15.47 1.62.57.47.1.87.11 1.19.03.32-.08.56-.26.73-.54.17-.28.26-.66.31-1.14.05-.48.02-1.05-.08-1.7-.1-.65-.25-1.38-.45-2.18-.2-.8-.45-1.67-.75-2.61-.3-.94-.65-1.95-1.05-3.03l1.73-.67c.35.92.65 1.78.91 2.58.26.8.47 1.54.63 2.22.16.68.27 1.29.33 1.83.06.54.07 1.01.03 1.41z"/>
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-white mb-4">Real Rewards</h3>
-          <p className="text-gray-400 leading-relaxed">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4 font-playfair">Real Rewards</h3>
+          <p className="text-gray-600 leading-relaxed">
             Earn WLD tokens with dynamic pricing from Pyth Network real-time market data.
           </p>
         </div>
@@ -89,16 +89,16 @@ export default function Home() {
               <p className="text-green-300/80">World App detected - All systems ready</p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/verify"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 rounded-xl font-semibold text-lg transition-colors"
+                className="bg-gray-900 hover:bg-gray-800 text-white px-10 py-3 rounded-lg font-medium text-lg transition-colors shadow-sm"
               >
                 Start Competing
               </Link>
               <Link
                 href="/leaderboard"
-                className="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 px-12 py-4 rounded-xl font-semibold text-lg transition-colors"
+                className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-900 px-10 py-3 rounded-lg font-medium text-lg transition-colors shadow-sm"
               >
                 View Leaderboard
               </Link>

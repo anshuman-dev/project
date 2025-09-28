@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { MiniKitProvider } from "@/components/MiniKitProvider";
 
 const inter = Inter({ subsets: ["latin"] });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-playfair' });
 
 export const metadata: Metadata = {
   title: "ChainOlympics - Compete. Verify. Win.",
@@ -20,20 +21,20 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <MiniKitProvider>
-          <div className="min-h-screen bg-gray-950">
-            <header className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-800">
-              <div className="container mx-auto px-6 py-5">
+          <div className={`min-h-screen bg-white ${playfair.variable}`}>
+            <header className="bg-white border-b border-gray-200 shadow-sm">
+              <div className="container mx-auto px-6 py-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">C</span>
+                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-xl font-serif">C</span>
                     </div>
                     <div>
-                      <h1 className="text-xl font-semibold text-white">ChainOlympics</h1>
-                      <p className="text-xs text-gray-400">Verified Competition Platform</p>
+                      <h1 className="text-2xl font-playfair font-bold text-gray-900">ChainOlympics</h1>
+                      <p className="text-sm text-gray-600 font-medium">Verified Competition Platform</p>
                     </div>
                   </div>
-                  <div className="text-sm text-gray-400 font-medium">
+                  <div className="text-sm text-gray-500 font-medium">
                     World ID • ENS • Pyth
                   </div>
                 </div>

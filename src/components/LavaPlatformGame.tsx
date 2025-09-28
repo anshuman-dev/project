@@ -78,11 +78,18 @@ export default function LavaPlatformGame({ onGameEnd }: LavaPlatformGameProps) {
       type: 'normal',
     });
 
-    // Generate platforms going up
+    // Generate platforms going up with better spacing
+    let lastX = GAME_CONFIG.CANVAS_WIDTH / 2; // Start from middle
     for (let i = 1; i < 50; i++) {
       const y = GAME_CONFIG.CANVAS_HEIGHT - 30 - (i * GAME_CONFIG.PLATFORM_GAP);
-      const width = Math.random() * 100 + 80; // 80-180px wide
-      const x = Math.random() * (GAME_CONFIG.CANVAS_WIDTH - width);
+      const width = Math.random() * 60 + 100; // 100-160px wide (larger platforms)
+
+      // Ensure platforms are reachable - limit horizontal distance
+      const maxDistance = 120; // Maximum jump distance
+      const minX = Math.max(0, lastX - maxDistance);
+      const maxX = Math.min(GAME_CONFIG.CANVAS_WIDTH - width, lastX + maxDistance);
+      const x = Math.random() * (maxX - minX) + minX;
+      lastX = x + width / 2; // Track center of platform
 
       let type: 'normal' | 'bonus' | 'danger' = 'normal';
       const rand = Math.random();
@@ -154,7 +161,8 @@ export default function LavaPlatformGame({ onGameEnd }: LavaPlatformGameProps) {
         case 'w':
         case 'W':
           e.preventDefault();
-          if (gameState.player.isOnPlatform || gameState.player.y >= GAME_CONFIG.CANVAS_HEIGHT - 100) {
+          // Only allow jump if on platform or ground AND not already jumping
+          if ((gameState.player.isOnPlatform || gameState.player.y >= GAME_CONFIG.CANVAS_HEIGHT - 100) && !gameState.player.isJumping) {
             setGameState(prev => ({
               ...prev,
               player: {
@@ -253,8 +261,16 @@ export default function LavaPlatformGame({ onGameEnd }: LavaPlatformGameProps) {
         }
       }
 
+      // Check ground collision (starting platform)
       if (!onPlatform) {
         newPlayer.isOnPlatform = false;
+        const groundLevel = GAME_CONFIG.CANVAS_HEIGHT - 100;
+        if (newPlayer.y + GAME_CONFIG.PLAYER_HEIGHT >= groundLevel && newPlayer.velocityY > 0) {
+          newPlayer.y = groundLevel - GAME_CONFIG.PLAYER_HEIGHT;
+          newPlayer.velocityY = 0;
+          newPlayer.isJumping = false;
+          newPlayer.isOnPlatform = true;
+        }
       }
 
       // Update camera to follow player
@@ -392,16 +408,45 @@ export default function LavaPlatformGame({ onGameEnd }: LavaPlatformGameProps) {
       ctx.stroke();
     }
 
-    // Draw lava
+    // Draw realistic animated lava
     const lavaScreenY = gameState.lavaHeight - gameState.cameraY;
     if (lavaScreenY < GAME_CONFIG.CANVAS_HEIGHT + 50) {
+      const time = Date.now() * 0.005; // Animation time
+
+      // Create realistic lava gradient
       const gradient = ctx.createLinearGradient(0, lavaScreenY, 0, lavaScreenY + 100);
-      gradient.addColorStop(0, '#FF4500');
-      gradient.addColorStop(0.5, '#FF6347');
-      gradient.addColorStop(1, '#DC143C');
+      gradient.addColorStop(0, '#FF8C00'); // Dark orange surface
+      gradient.addColorStop(0.2, '#FF4500'); // Orange red
+      gradient.addColorStop(0.4, '#DC143C'); // Crimson
+      gradient.addColorStop(0.7, '#8B0000'); // Dark red
+      gradient.addColorStop(1, '#4B0000'); // Deep dark red
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, lavaScreenY, GAME_CONFIG.CANVAS_WIDTH, GAME_CONFIG.CANVAS_HEIGHT);
+
+      // Add lava bubbles and heat effects
+      ctx.save();
+      for (let i = 0; i < 15; i++) {
+        const bubbleX = (i * 40 + Math.sin(time + i) * 20) % GAME_CONFIG.CANVAS_WIDTH;
+        const bubbleY = lavaScreenY + Math.sin(time * 2 + i) * 5;
+        const bubbleSize = 3 + Math.sin(time * 3 + i) * 2;
+
+        ctx.fillStyle = `rgba(255, 140, 0, ${0.6 + Math.sin(time + i) * 0.3})`;
+        ctx.beginPath();
+        ctx.arc(bubbleX, bubbleY, bubbleSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Add heat waves effect on top of lava
+      ctx.strokeStyle = 'rgba(255, 69, 0, 0.3)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < GAME_CONFIG.CANVAS_WIDTH; x += 10) {
+        ctx.beginPath();
+        ctx.moveTo(x, lavaScreenY);
+        ctx.lineTo(x + Math.sin(time * 4 + x * 0.1) * 3, lavaScreenY - 10);
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     ctx.restore();

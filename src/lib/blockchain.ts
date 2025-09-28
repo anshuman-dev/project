@@ -143,21 +143,28 @@ export class BlockchainManager {
         return { success: false, error: 'Wallet not connected' };
       }
 
-      // For demo purposes, simulate the transaction
-      // In production, this would call the actual contract
-      const mockTxHash = '0x' + Math.random().toString(16).substring(2);
+      // Real blockchain transaction to World Chain mainnet
+      const tx = await this.contract.verifyAndRegisterAthlete(
+        athleteData.address,
+        athleteData.ensName,
+        athleteData.country,
+        worldIdProof.root,
+        worldIdProof.nullifierHash,
+        worldIdProof.proof
+      );
 
-      console.log('Simulating athlete registration:', {
+      console.log('Real blockchain transaction submitted:', {
+        txHash: tx.hash,
         athlete: athleteData.address,
         ensName: athleteData.ensName,
         country: athleteData.country,
-        worldIdProof,
       });
 
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Wait for transaction confirmation
+      const receipt = await tx.wait();
+      console.log('Transaction confirmed:', receipt.transactionHash);
 
-      return { success: true, txHash: mockTxHash };
+      return { success: true, txHash: receipt.transactionHash };
     } catch (error) {
       console.error('Registration error:', error);
       return { success: false, error: 'Registration failed' };
@@ -179,22 +186,28 @@ export class BlockchainManager {
       const levelBonus = (level - 1) * (basePrize / 10);
       const totalPrize = Math.min(basePrize + levelBonus, 5); // Cap at 5 WLD
 
-      // For demo purposes, simulate the transaction
-      const mockTxHash = '0x' + Math.random().toString(16).substring(2);
+      // Real blockchain transaction for game result submission
+      const tx = await this.contract.submitGameResult(
+        score,
+        level,
+        gameType
+      );
 
-      console.log('Simulating game result submission:', {
+      console.log('Real game result transaction submitted:', {
+        txHash: tx.hash,
         score,
         level,
         gameType,
         expectedPrize: totalPrize,
       });
 
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Wait for transaction confirmation
+      const receipt = await tx.wait();
+      console.log('Game result transaction confirmed:', receipt.transactionHash);
 
       return {
         success: true,
-        txHash: mockTxHash,
+        txHash: receipt.transactionHash,
         prizeAmount: totalPrize.toFixed(4),
       };
     } catch (error) {
