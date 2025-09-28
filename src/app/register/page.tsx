@@ -14,7 +14,7 @@ export default function RegisterPage() {
     selectedSubdomain: '',
   });
   const [isRegistering, setIsRegistering] = useState(false);
-  const [walletState, setWalletState] = useState({ isConnected: false, address: null });
+  const [walletState, setWalletState] = useState<{ isConnected: boolean; address: string | null }>({ isConnected: false, address: null });
   const [worldIdProof, setWorldIdProof] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [registrationTxHash, setRegistrationTxHash] = useState<string | null>(null);
   const [countries] = useState([

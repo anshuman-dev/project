@@ -14,7 +14,7 @@ export default function GamePage() {
   const [gameResult, setGameResult] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [showGame, setShowGame] = useState(false);
   const [isSubmittingResult, setIsSubmittingResult] = useState(false);
-  const [blockchainTx, setBlockchainTx] = useState<string | null>(null);
+  // const [blockchainTx, setBlockchainTx] = useState<string | null>(null);
   const pythManager = PythPriceManager.getInstance();
 
   // Load athlete data on mount
@@ -47,7 +47,7 @@ export default function GamePage() {
 
   const handleGameEnd = async (score: number, level: number) => {
     setIsSubmittingResult(true);
-    setBlockchainTx(null);
+    // setBlockchainTx(null);
 
     try {
       // Submit game result to blockchain
@@ -58,7 +58,7 @@ export default function GamePage() {
       );
 
       if (blockchainResult.success && blockchainResult.txHash) {
-        setBlockchainTx(blockchainResult.txHash);
+        // setBlockchainTx(blockchainResult.txHash);
 
         // Calculate prize based on blockchain response
         const maxScore = 50;

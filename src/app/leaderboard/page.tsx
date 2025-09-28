@@ -15,7 +15,7 @@ interface LeaderboardEntry {
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [currentAthlete, setCurrentAthlete] = useState<any>(null);
+  const [currentAthlete, setCurrentAthlete] = useState<LeaderboardEntry | null>(null);
   const [wldPrice, setWldPrice] = useState(2.50);
   const [totalPrizePool, setTotalPrizePool] = useState('0.0000');
   const pythManager = PythPriceManager.getInstance();
@@ -24,7 +24,7 @@ export default function LeaderboardPage() {
     // Load current athlete data
     const stored = localStorage.getItem('chainolympics_athlete');
     if (stored) {
-      setCurrentAthlete(JSON.parse(stored));
+      setCurrentAthlete(JSON.parse(stored) as LeaderboardEntry);
     }
 
     // Update WLD price
@@ -169,7 +169,7 @@ export default function LeaderboardPage() {
               </tr>
             </thead>
             <tbody>
-              {leaderboard.map((entry, index) => (
+              {leaderboard.map((entry) => (
                 <tr
                   key={entry.ensName}
                   className={`border-t border-white/10 hover:bg-white/5 transition-colors ${

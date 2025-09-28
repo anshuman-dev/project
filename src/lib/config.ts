@@ -12,10 +12,9 @@ export const ENS_CONFIG = {
   WALLET_ADDRESS: '0x137c2e26c634073BD42a91f79DEf41A9f80dc1cF',
 } as const;
 
-// Pyth Network configuration
+// Pyth Network configuration - MAINNET
 export const PYTH_CONFIG = {
-  WORLD_CHAIN_MAINNET: '0xe9d69cdd6fe41e7b621b4a688c5d1a68cb5c8adc',
-  WORLD_CHAIN_TESTNET: '0x2880aB155794e7179c9eE2e38200202908C17B43',
+  CURRENT_CONTRACT: '0xe9d69cdd6fe41e7b621b4a688c5d1a68cb5c8adc', // Pyth on World Chain Mainnet
   WLD_USD_FEED_ID: '0xd6835ad1f773de4a378115eb6824bd0c0e42d84d1c84d9750e853fb6b6c7794a', // WLD/USD price feed
   HERMES_ENDPOINT: 'https://hermes.pyth.network',
 } as const;
@@ -35,6 +34,9 @@ export const WORLD_CHAIN_CONFIG = {
     blockExplorer: 'https://worldscan.org',
   },
 } as const;
+
+// Current network (switch to MAINNET for production)
+export const CURRENT_NETWORK = WORLD_CHAIN_CONFIG.MAINNET;
 
 // Game configuration
 export const GAME_CONFIG = {

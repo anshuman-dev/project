@@ -9,56 +9,62 @@ export default function Home() {
   const [currentPrize, setCurrentPrize] = useState('$125.50');
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       {/* Hero Section */}
-      <div className="text-center mb-20">
-        <div className="mb-8">
-          <h1 className="text-6xl md:text-8xl font-light text-white mb-4 tracking-tight">
-            Chain<span className="font-medium text-amber-400">Olympics</span>
+      <div className="text-center mb-24 py-16">
+        <div className="mb-12">
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
+            Chain<span className="text-blue-400">Olympics</span>
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-orange-400 mx-auto mb-8"></div>
+          <div className="w-16 h-1 bg-blue-500 mx-auto mb-8"></div>
         </div>
 
-        <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
-          Olympic-style competitions for verified humans. Compete with skill, earn with merit.
+        <p className="text-xl md:text-2xl text-gray-300 mb-16 max-w-4xl mx-auto leading-relaxed">
+          Skill-based competitions with verified human participation and real cryptocurrency rewards.
         </p>
 
-        <div className="inline-flex items-center gap-3 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-8 py-4">
-          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-slate-300 text-lg">Current Prize Pool:</span>
-          <span className="text-amber-400 font-semibold text-xl">{currentPrize} WLD</span>
+        <div className="inline-flex items-center gap-4 bg-gray-900 border border-gray-700 rounded-xl px-8 py-5">
+          <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+          <span className="text-gray-200 text-lg font-medium">Current Prize Pool:</span>
+          <span className="text-blue-400 font-bold text-xl">{currentPrize} WLD</span>
         </div>
       </div>
 
       {/* Features Grid */}
-      <div className="grid md:grid-cols-3 gap-8 mb-20">
-        <div className="group bg-slate-900/30 backdrop-blur-sm rounded-3xl p-8 border border-slate-700/30 hover:border-slate-600/50 transition-all duration-300">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-            🌍
+      <div className="grid md:grid-cols-3 gap-8 mb-24">
+        <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition-colors">
+          <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
+            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
           </div>
-          <h3 className="text-2xl font-semibold text-white mb-4">Proof of Human</h3>
-          <p className="text-slate-400 leading-relaxed">
-            Verify your identity with World ID zero-knowledge proofs. Only real humans compete.
+          <h3 className="text-xl font-semibold text-white mb-4">Human Verification</h3>
+          <p className="text-gray-400 leading-relaxed">
+            Zero-knowledge proof verification through World ID ensures only verified humans participate.
           </p>
         </div>
 
-        <div className="group bg-slate-900/30 backdrop-blur-sm rounded-3xl p-8 border border-slate-700/30 hover:border-slate-600/50 transition-all duration-300">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-400 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-            🏷️
+        <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition-colors">
+          <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
+            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
           </div>
-          <h3 className="text-2xl font-semibold text-white mb-4">Your Identity</h3>
-          <p className="text-slate-400 leading-relaxed">
-            Claim your .athlete.eth name for permanent on-chain reputation across platforms.
+          <h3 className="text-xl font-semibold text-white mb-4">Athletic Identity</h3>
+          <p className="text-gray-400 leading-relaxed">
+            Secure your .athlete.eth subdomain for permanent cross-platform reputation.
           </p>
         </div>
 
-        <div className="group bg-slate-900/30 backdrop-blur-sm rounded-3xl p-8 border border-slate-700/30 hover:border-slate-600/50 transition-all duration-300">
-          <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-400 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-            💰
+        <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition-colors">
+          <div className="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center mb-6">
+            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.08 2.94-.01 4.04.08 1.15.16 2.08.05 2.79-.12.75-.39 1.29-.73 1.61-.34.32-.77.51-1.28.59-.5.08-1.07.05-1.69-.08-.62-.13-1.29-.35-2.01-.65-.72-.3-1.49-.68-2.3-1.13-.81-.45-1.66-.98-2.55-1.59l1.4-1.4c.73.49 1.4.87 2.01 1.15.61.28 1.15.47 1.62.57.47.1.87.11 1.19.03.32-.08.56-.26.73-.54.17-.28.26-.66.31-1.14.05-.48.02-1.05-.08-1.7-.1-.65-.25-1.38-.45-2.18-.2-.8-.45-1.67-.75-2.61-.3-.94-.65-1.95-1.05-3.03l1.73-.67c.35.92.65 1.78.91 2.58.26.8.47 1.54.63 2.22.16.68.27 1.29.33 1.83.06.54.07 1.01.03 1.41z"/>
+            </svg>
           </div>
-          <h3 className="text-2xl font-semibold text-white mb-4">Real Prizes</h3>
-          <p className="text-slate-400 leading-relaxed">
-            Earn WLD tokens with real-time market pricing powered by Pyth Network oracles.
+          <h3 className="text-xl font-semibold text-white mb-4">Real Rewards</h3>
+          <p className="text-gray-400 leading-relaxed">
+            Earn WLD tokens with dynamic pricing from Pyth Network real-time market data.
           </p>
         </div>
       </div>
@@ -83,17 +89,16 @@ export default function Home() {
               <p className="text-green-300/80">World App detected - All systems ready</p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link
                 href="/verify"
-                className="group relative bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 hover:from-blue-700 hover:to-blue-800 hover:shadow-lg hover:shadow-blue-500/25"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 rounded-xl font-semibold text-lg transition-colors"
               >
-                <span className="relative z-10">Start Competing</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                Start Competing
               </Link>
               <Link
                 href="/leaderboard"
-                className="bg-slate-800/50 border border-slate-600/50 text-slate-200 px-10 py-4 rounded-2xl font-semibold text-lg hover:bg-slate-700/50 hover:border-slate-500/50 transition-all duration-300"
+                className="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 px-12 py-4 rounded-xl font-semibold text-lg transition-colors"
               >
                 View Leaderboard
               </Link>

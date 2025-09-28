@@ -48,7 +48,7 @@ interface LavaPlatformGameProps {
 
 export default function LavaPlatformGame({ onGameEnd }: LavaPlatformGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const gameLoopRef = useRef<number>();
+  const gameLoopRef = useRef<number | undefined>(undefined);
   const [gameState, setGameState] = useState<GameState>({
     player: {
       x: GAME_CONFIG.CANVAS_WIDTH / 2,

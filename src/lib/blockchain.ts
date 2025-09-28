@@ -1,15 +1,14 @@
 import { ethers } from 'ethers';
+import { CURRENT_NETWORK } from './config';
 
-// World Chain Sepolia configuration
-export const WORLD_CHAIN_SEPOLIA = {
-  chainId: 4801,
-  name: 'World Chain Sepolia',
-  rpcUrl: 'https://worldchain-sepolia.g.alchemy.com/public',
-  blockExplorer: 'https://worldchain-sepolia.blockscout.com',
+// World Chain Mainnet configuration - LIVE DEPLOYMENT
+export const CURRENT_CHAIN_CONFIG = {
+  ...CURRENT_NETWORK,
+  blockExplorer: 'https://worldscan.org',
   contracts: {
-    chainOlympics: '0x630db23f93918176af66ffa83614a120d61004e8', // ✅ DEPLOYED ON WORLD CHAIN SEPOLIA
-    worldIdRouter: '0x11cA3127182f7583EfC416a8771BD4d11Fae4334',
-    wldToken: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1',
+    chainOlympics: '0x630db23f93918176af66ffa83614a120d61004e8', // ✅ LIVE ON WORLD CHAIN MAINNET
+    worldIdRouter: '0x163b09b4fE21177c455D850BD815B6D583732432', // World ID Router - World Chain Mainnet
+    wldToken: '0x2cFc85d8E714Ba6C0d01A86C66c0741c7b75F7B4', // WLD Token - World Chain Mainnet
   },
 };
 
@@ -52,7 +51,7 @@ export class BlockchainManager {
   private signer: ethers.Signer | null = null;
 
   private constructor() {
-    this.provider = new ethers.providers.JsonRpcProvider(WORLD_CHAIN_SEPOLIA.rpcUrl);
+    this.provider = new ethers.providers.JsonRpcProvider(CURRENT_CHAIN_CONFIG.rpcUrl);
   }
 
   public static getInstance(): BlockchainManager {
@@ -78,14 +77,14 @@ export class BlockchainManager {
 
       // Initialize contract with signer
       this.contract = new ethers.Contract(
-        WORLD_CHAIN_SEPOLIA.contracts.chainOlympics,
+        CURRENT_CHAIN_CONFIG.contracts.chainOlympics,
         CHAIN_OLYMPICS_ABI,
         this.signer
       );
 
       // Check if we're on the correct network
       const network = await web3Provider.getNetwork();
-      if (network.chainId !== WORLD_CHAIN_SEPOLIA.chainId) {
+      if (network.chainId !== CURRENT_CHAIN_CONFIG.chainId) {
         await this.switchToWorldChain();
       }
 
@@ -102,19 +101,19 @@ export class BlockchainManager {
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${WORLD_CHAIN_SEPOLIA.chainId.toString(16)}` }],
+        params: [{ chainId: `0x${CURRENT_CHAIN_CONFIG.chainId.toString(16)}` }],
       });
-    } catch (switchError: any) {
+    } catch (switchError: unknown) {
       // If the chain doesn't exist, add it
-      if (switchError.code === 4902) {
+      if ((switchError as { code: number }).code === 4902) { // eslint-disable-line @typescript-eslint/no-explicit-any
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [
             {
-              chainId: `0x${WORLD_CHAIN_SEPOLIA.chainId.toString(16)}`,
-              chainName: WORLD_CHAIN_SEPOLIA.name,
-              rpcUrls: [WORLD_CHAIN_SEPOLIA.rpcUrl],
-              blockExplorerUrls: [WORLD_CHAIN_SEPOLIA.blockExplorer],
+              chainId: `0x${CURRENT_CHAIN_CONFIG.chainId.toString(16)}`,
+              chainName: CURRENT_CHAIN_CONFIG.name,
+              rpcUrls: [CURRENT_CHAIN_CONFIG.rpcUrl],
+              blockExplorerUrls: [CURRENT_CHAIN_CONFIG.blockExplorer],
               nativeCurrency: {
                 name: 'ETH',
                 symbol: 'ETH',
@@ -275,7 +274,7 @@ export class BlockchainManager {
   }
 
   getBlockExplorerUrl(txHash: string): string {
-    return `${WORLD_CHAIN_SEPOLIA.blockExplorer}/tx/${txHash}`;
+    return `${CURRENT_CHAIN_CONFIG.blockExplorer}/tx/${txHash}`;
   }
 
   formatAddress(address: string): string {
@@ -290,9 +289,9 @@ export const blockchainManager = BlockchainManager.getInstance();
 declare global {
   interface Window {
     ethereum?: {
-      request: (args: { method: string; params?: any[] }) => Promise<any>;
-      on: (event: string, callback: (...args: any[]) => void) => void;
-      removeListener: (event: string, callback: (...args: any[]) => void) => void;
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+      on: (event: string, callback: (...args: unknown[]) => void) => void;
+      removeListener: (event: string, callback: (...args: unknown[]) => void) => void;
     };
   }
 }

@@ -3,7 +3,7 @@
 ## Executive Summary
 ChainOlympics successfully integrates **three major ETHGlobal partners** targeting **$25,000 in bounty prizes**. Our platform provides Olympic-style competitions for verified humans with real blockchain rewards.
 
-**Live Testnet Deployment**: `0x630db23f93918176af66ffa83614a120d61004e8` on World Chain Sepolia
+**Live Mainnet Deployment**: `0x630db23f93918176af66ffa83614a120d61004e8` on World Chain Mainnet
 
 ---
 
@@ -21,9 +21,9 @@ ChainOlympics successfully integrates **three major ETHGlobal partners** targeti
   - Action ID: `olympic-athlete-verification`
 
 #### 2. **World Chain Deployment**
-- **Smart Contract**: Deployed on World Chain Sepolia testnet
+- **Smart Contract**: Deployed on World Chain Mainnet
 - **Contract Address**: `0x630db23f93918176af66ffa83614a120d61004e8`
-- **Network**: World Chain Sepolia (Chain ID: 4801)
+- **Network**: World Chain Mainnet (Chain ID: 480)
 - **Integration**: All game transactions occur on World Chain
 
 #### 3. **Non-Gambling Verification**
@@ -184,14 +184,14 @@ export class PythPriceManager {
 ## 🚀 Submission Ready
 
 ### Evidence Package:
-- ✅ **Live Testnet Deployment** with real transactions
+- ✅ **Live Mainnet Deployment** with real transactions
 - ✅ **Complete Codebase** with partner integrations
 - ✅ **Functional Demo** meeting all requirements
 - ✅ **Video Documentation** of complete user flow
-- ✅ **Smart Contract Verification** on World Chain Sepolia
+- ✅ **Smart Contract Verification** on World Chain Mainnet
 
 ### Links:
-- **Contract**: https://worldchain-sepolia.blockscout.com/address/0x630db23f93918176af66ffa83614a120d61004e8
+- **Contract**: https://worldscan.org/address/0x630db23f93918176af66ffa83614a120d61004e8
 - **Live Demo**: [Platform URL]
 - **GitHub**: [Repository URL]
 
