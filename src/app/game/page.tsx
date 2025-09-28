@@ -35,8 +35,9 @@ export default function GamePage() {
 
       // Update current prize display for max score
       const maxScore = 50; // High score for platform jumping
-      const prizeCalc = pythManager.calculatePrizeAmount(maxScore, maxScore);
-      setCurrentPrize(pythManager.formatPriceDisplay(prizeCalc.wldAmount));
+      const prizeCalc = await pythManager.calculatePrizeAmount(maxScore, maxScore);
+      const prizeDisplay = await pythManager.formatPriceDisplay(prizeCalc.wldAmount);
+      setCurrentPrize(prizeDisplay);
     };
 
     updatePrice();
@@ -63,7 +64,7 @@ export default function GamePage() {
         // Calculate prize based on blockchain response
         const maxScore = 50;
         const adjustedScore = Math.min(score, maxScore);
-        const prizeCalc = pythManager.calculatePrizeAmount(adjustedScore, maxScore);
+        const prizeCalc = await pythManager.calculatePrizeAmount(adjustedScore, maxScore);
 
         // Use blockchain prize amount if available
         const blockchainPrize = blockchainResult.prizeAmount
@@ -111,7 +112,7 @@ export default function GamePage() {
       // Fallback to local processing
       const maxScore = 50;
       const adjustedScore = Math.min(score, maxScore);
-      const prizeCalc = pythManager.calculatePrizeAmount(adjustedScore, maxScore);
+      const prizeCalc = await pythManager.calculatePrizeAmount(adjustedScore, maxScore);
       const levelBonus = (level - 1) * 0.1;
       const finalPrize = {
         ...prizeCalc,

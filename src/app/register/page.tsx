@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { WalletManager } from '@/lib/wallet';
 import { blockchainManager } from '@/lib/blockchain';
+import { ensManager, validateSubdomain, type ENSRegistrationResult } from '@/lib/ens';
+import { ethers } from 'ethers';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -17,6 +19,9 @@ export default function RegisterPage() {
   const [walletState, setWalletState] = useState<{ isConnected: boolean; address: string | null }>({ isConnected: false, address: null });
   const [worldIdProof, setWorldIdProof] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [registrationTxHash, setRegistrationTxHash] = useState<string | null>(null);
+  const [ensRegistrationResult, setEnsRegistrationResult] = useState<ENSRegistrationResult | null>(null);
+  const [subdomainValidation, setSubdomainValidation] = useState<{ valid: boolean; error?: string }>({ valid: true });
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [countries] = useState([
     'United States', 'Canada', 'United Kingdom', 'Germany', 'France',
     'Japan', 'Australia', 'Brazil', 'India', 'China', 'Other'
@@ -61,18 +66,44 @@ export default function RegisterPage() {
     }
   };
 
-  const handleAthleteNameChange = (name: string) => {
-    const subdomain = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const handleAthleteNameChange = async (name: string) => {
+    const subdomain = name.toLowerCase().replace(/[^a-z0-9-]/g, '');
+
+    // Validate subdomain format
+    const validation = validateSubdomain(subdomain);
+    setSubdomainValidation(validation);
+
     setFormData({
       ...formData,
       athleteName: name,
       selectedSubdomain: subdomain ? `${subdomain}.athlete.eth` : '',
     });
+
+    // Check availability if valid
+    if (validation.valid && subdomain) {
+      setIsCheckingAvailability(true);
+      try {
+        const availability = await ensManager.isSubdomainAvailable(subdomain);
+        setSubdomainValidation({
+          valid: availability.available,
+          error: availability.available ? undefined : 'Subdomain already taken'
+        });
+      } catch (error) {
+        console.error('Error checking availability:', error);
+        setSubdomainValidation({
+          valid: false,
+          error: 'Unable to check availability'
+        });
+      } finally {
+        setIsCheckingAvailability(false);
+      }
+    }
   };
 
   const handleRegistration = async () => {
     setIsRegistering(true);
     setRegistrationTxHash(null);
+    setEnsRegistrationResult(null);
 
     try {
       // Connect to blockchain if not already connected
@@ -81,30 +112,59 @@ export default function RegisterPage() {
         throw new Error(walletResult.error || 'Wallet connection failed');
       }
 
-      // Prepare athlete data for blockchain registration
+      const walletAddress = walletState.address || walletResult.address!;
+
+      // Extract subdomain from full domain
+      const subdomain = formData.selectedSubdomain.replace('.athlete.eth', '');
+
+      // Step 1: Initialize ENS manager with wallet signer
+      const web3Provider = new (window as any).ethereum ?
+        new ethers.providers.Web3Provider((window as any).ethereum) : null;
+
+      if (!web3Provider) {
+        throw new Error('Web3 provider not available');
+      }
+
+      const signer = web3Provider.getSigner();
+      await ensManager.initialize(signer);
+
+      // Step 2: Register ENS subdomain first
+      console.log('Registering ENS subdomain:', subdomain);
+      const ensResult = await ensManager.registerAthleteSubdomain({
+        subdomain,
+        owner: walletAddress,
+        description: `ChainOlympics athlete from ${formData.country}`,
+        avatar: '', // Can be updated later
+      });
+
+      if (!ensResult.success) {
+        throw new Error(ensResult.error || 'ENS registration failed');
+      }
+
+      setEnsRegistrationResult(ensResult);
+      console.log('ENS registration successful:', ensResult);
+
+      // Step 3: Register athlete on ChainOlympics blockchain
       const athleteData = {
         ensName: formData.selectedSubdomain,
         country: formData.country,
-        address: walletState.address || walletResult.address!,
+        address: walletAddress,
       };
 
-      // Simulate World ID proof for demo (in production, use real proof)
-      const mockWorldIdProof = worldIdProof || {
-        root: '0x' + '1'.repeat(64),
-        nullifierHash: '0x' + Math.random().toString(16).substring(2).padStart(64, '0'),
-        proof: Array(8).fill('0x' + '1'.repeat(64)),
-      };
+      // Use real World ID proof if available, otherwise fail
+      if (!worldIdProof) {
+        throw new Error('World ID verification required. Please verify your identity first.');
+      }
 
-      // Register athlete on blockchain
       const registrationResult = await blockchainManager.registerAthlete(
         athleteData,
-        mockWorldIdProof
+        worldIdProof
       );
 
       if (registrationResult.success && registrationResult.txHash) {
         setRegistrationTxHash(registrationResult.txHash);
 
-        // Store athlete data locally with blockchain info
+        // Store athlete data locally (minimal data for app functionality)
         const localAthleteData = {
           ...formData,
           walletAddress: athleteData.address,
@@ -112,6 +172,7 @@ export default function RegisterPage() {
           isVerified: true,
           registeredAt: new Date().toISOString(),
           registrationTxHash: registrationResult.txHash,
+          ensTransactionHash: ensResult.txHash,
           worldIdVerified: true,
         };
 
@@ -120,32 +181,24 @@ export default function RegisterPage() {
         // Clear World ID proof from storage
         localStorage.removeItem('chainolympics_worldid_proof');
 
-        // Wait a moment to show transaction hash, then redirect
+        console.log('Full registration completed:', {
+          ensHash: ensResult.txHash,
+          blockchainHash: registrationResult.txHash,
+          domain: ensResult.domain,
+        });
+
+        // Wait to show both transaction hashes, then redirect
         setTimeout(() => {
           router.push('/game');
-        }, 3000);
+        }, 5000);
       } else {
         throw new Error(registrationResult.error || 'Blockchain registration failed');
       }
     } catch (error) {
       console.error('Registration failed:', error);
 
-      // Fallback to local registration
-      const athleteData = {
-        ...formData,
-        walletAddress: walletState.address,
-        ensName: formData.selectedSubdomain,
-        isVerified: true,
-        registeredAt: new Date().toISOString(),
-        registrationTxHash: null,
-        worldIdVerified: !!worldIdProof,
-      };
-
-      localStorage.setItem('chainolympics_athlete', JSON.stringify(athleteData));
-
-      setTimeout(() => {
-        router.push('/game');
-      }, 2000);
+      // No fallback - require real registration
+      throw error;
     } finally {
       setIsRegistering(false);
     }
@@ -273,15 +326,45 @@ export default function RegisterPage() {
               </div>
 
               {formData.selectedSubdomain && (
-                <div className="bg-blue-500/20 border border-blue-500 rounded-lg p-3">
-                  <p className="text-blue-200 text-sm mb-1">Your ENS subdomain will be:</p>
-                  <p className="text-blue-100 font-bold">{formData.selectedSubdomain}</p>
+                <div className={`rounded-lg p-3 ${
+                  subdomainValidation.valid
+                    ? 'bg-green-500/20 border border-green-500'
+                    : 'bg-red-500/20 border border-red-500'
+                }`}>
+                  <p className={`text-sm mb-1 ${
+                    subdomainValidation.valid ? 'text-green-200' : 'text-red-200'
+                  }`}>
+                    Your ENS subdomain will be:
+                  </p>
+                  <p className={`font-bold ${
+                    subdomainValidation.valid ? 'text-green-100' : 'text-red-100'
+                  }`}>
+                    {formData.selectedSubdomain}
+                  </p>
+                  {isCheckingAvailability && (
+                    <p className="text-yellow-200 text-xs mt-1">
+                      <div className="inline-flex items-center">
+                        <div className="animate-spin w-3 h-3 border border-yellow-300 border-t-transparent rounded-full mr-1"></div>
+                        Checking availability...
+                      </div>
+                    </p>
+                  )}
+                  {!subdomainValidation.valid && subdomainValidation.error && (
+                    <p className="text-red-300 text-xs mt-1">
+                      ⚠️ {subdomainValidation.error}
+                    </p>
+                  )}
+                  {subdomainValidation.valid && !isCheckingAvailability && (
+                    <p className="text-green-300 text-xs mt-1">
+                      ✅ Available for registration
+                    </p>
+                  )}
                 </div>
               )}
 
               <button
                 onClick={() => setStep(2)}
-                disabled={!formData.athleteName || !formData.selectedSubdomain}
+                disabled={!formData.athleteName || !formData.selectedSubdomain || !subdomainValidation.valid || isCheckingAvailability}
                 className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white py-3 rounded-lg font-bold transition-colors"
               >
                 Continue
@@ -356,8 +439,9 @@ export default function RegisterPage() {
 
               <div className="bg-yellow-500/20 border border-yellow-500 rounded-lg p-3">
                 <p className="text-yellow-200 text-sm">
-                  <strong>Note:</strong> This will register your athlete identity on the blockchain.
-                  Your ENS subdomain will be linked to your verified World ID.
+                  <strong>Real Registration:</strong> This will create two blockchain transactions:
+                  <br />• ENS subdomain registration on Ethereum mainnet
+                  <br />• Athlete profile on World Chain with verified World ID
                 </p>
               </div>
 
@@ -369,10 +453,30 @@ export default function RegisterPage() {
                 </div>
               )}
 
+              {ensRegistrationResult && (
+                <div className="bg-green-500/20 border border-green-500 rounded-lg p-3">
+                  <p className="text-green-200 text-sm mb-2">
+                    🌍 <strong>ENS Registration:</strong>
+                  </p>
+                  <p className="text-green-100 font-mono text-xs break-all mb-1">
+                    Domain: {ensRegistrationResult.domain}
+                  </p>
+                  <p className="text-green-100 font-mono text-xs break-all">
+                    TX: {ensRegistrationResult.txHash}
+                  </p>
+                  <button
+                    onClick={() => window.open(`https://etherscan.io/tx/${ensRegistrationResult.txHash}`, '_blank')}
+                    className="mt-2 text-green-300 hover:text-green-100 text-sm underline"
+                  >
+                    View ENS Transaction
+                  </button>
+                </div>
+              )}
+
               {registrationTxHash && (
                 <div className="bg-blue-500/20 border border-blue-500 rounded-lg p-3">
                   <p className="text-blue-200 text-sm mb-2">
-                    🔗 <strong>Registration Transaction:</strong>
+                    🏆 <strong>ChainOlympics Registration:</strong>
                   </p>
                   <p className="text-blue-100 font-mono text-xs break-all">
                     {registrationTxHash}
@@ -381,7 +485,7 @@ export default function RegisterPage() {
                     onClick={() => window.open(blockchainManager.getBlockExplorerUrl(registrationTxHash), '_blank')}
                     className="mt-2 text-blue-300 hover:text-blue-100 text-sm underline"
                   >
-                    View on Block Explorer
+                    View on World Chain Explorer
                   </button>
                 </div>
               )}
