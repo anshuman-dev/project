@@ -10,6 +10,14 @@ export const metadata: Metadata = {
   title: "ChainOlympics - Compete. Verify. Win.",
   description: "Olympic-style games for verified humans with real crypto prizes",
   keywords: ["Olympics", "Blockchain", "World ID", "Competition", "Crypto"],
+  manifest: "/manifest.json",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+  themeColor: "#000000",
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+  },
 };
 
 export default function RootLayout({
